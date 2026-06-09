@@ -1,135 +1,463 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Direct Connect</title>
-
+    <title>Farmer Connect | Buy Directly From Farmers. Cut Out The Middlemen.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        forest: {
+                            50: '#f2f7f4',
+                            100: '#e2ede8',
+                            200: '#c5dbd1',
+                            600: '#2d6a4f',
+                            800: '#1b4332',
+                            900: '#143225',
+                        },
+                        emerald_brand: '#2d6a4f',
+                        mint_brand: '#d8f3dc',
+                        charcoal_brand: '#212529',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
         body {
-            background-color: #f4f7f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            color: #212529;
+            background-color: #f8fafc;
         }
-
-        .container {
-            background: #ffffff;
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
-
-        h1 {
-            color: #2e7d32;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        p {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #2e7d32;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background-color: #256628;
+        .glass-form {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
     </style>
 </head>
-<body>
+<body class="antialiased min-h-screen flex flex-col">
 
-    <div class="container">
-        <h1>Farm Direct Connect</h1>
-        <p>Buy directly from farmers and eliminate middlemen.</p>
+    <nav class="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-forest-800 flex items-center justify-center shadow-md shadow-forest-800/20">
+                        <i class="fa-solid fa-wheat-awn text-mint_brand text-xl"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-extrabold text-xl tracking-tight text-forest-800 leading-none">Farmer Connect</span>
+                        <span class="text-[10px] font-semibold uppercase tracking-widest text-forest-600 mt-1">Bypass Brokers</span>
+                    </div>
+                </div>
 
-        <form action="https://eunicewairima.app.n8n.cloud/webhook/e5329610-f552-42f6-b676-e3acde23acc2" method="POST">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input 
-                    type="text" 
-                    id="name" 
-                    placeholder="Enter your full name"
-                    name="name"
-                    required>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#problem" class="text-sm font-medium text-slate-600 hover:text-forest-800 transition-colors">Problem</a>
+                    <a href="#solution" class="text-sm font-medium text-slate-600 hover:text-forest-800 transition-colors">Solution</a>
+                    <a href="#how-it-works" class="text-sm font-medium text-slate-600 hover:text-forest-800 transition-colors">How It Works</a>
+                    <a href="#request-produce" class="text-sm font-medium text-slate-600 hover:text-forest-800 transition-colors">Request Produce</a>
+                </div>
+
+                <div class="hidden md:block">
+                    <a href="#request-produce" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-forest-800 hover:bg-forest-600 transition-all duration-200 shadow-sm hover:shadow">
+                        Request Produce
+                    </a>
+                </div>
+
+                <div class="md:hidden">
+                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-600 hover:text-forest-800 hover:bg-slate-50 focus:outline-none transition-all duration-200" aria-controls="mobile-menu" aria-expanded="false">
+                        <i id="menu-icon" class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden md:hidden bg-white border-b border-slate-100 shadow-inner" id="mobile-menu">
+            <div class="px-4 pt-3 pb-6 space-y-2">
+                <a href="#problem" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-forest-800 hover:bg-slate-50 transition-all">Problem</a>
+                <a href="#solution" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-forest-800 hover:bg-slate-50 transition-all">Solution</a>
+                <a href="#how-it-works" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-forest-800 hover:bg-slate-50 transition-all">How It Works</a>
+                <a href="#request-produce" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-forest-800 hover:bg-slate-50 transition-all">Request Produce</a>
+                <div class="pt-4 px-4">
+                    <a href="#request-produce" class="w-full flex items-center justify-center px-5 py-3 rounded-xl text-base font-semibold text-white bg-forest-800 hover:bg-forest-600 transition-all shadow shadow-forest-800/10">
+                        Request Produce
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative bg-gradient-to-b from-forest-50 via-white to-slate-50 pt-12 pb-24 overflow-hidden">
+        <div class="absolute inset-0 z-0 opacity-30">
+            <div class="absolute top-12 left-10 w-72 h-72 rounded-full bg-mint_brand blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-forest-200 blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-4xl mx-auto">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-forest-800 bg-mint_brand/60 border border-forest-200/50 mb-6">
+                    <i class="fa-solid fa-circle-check"></i> Direct Agro-Sourcing Matrix
+                </span>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-forest-800 mb-6 leading-[1.1]">
+                    Buy Directly From Farmers. <br class="hidden sm:inline" />
+                    <span class="bg-gradient-to-r from-forest-800 via-forest-600 to-emerald-600 bg-clip-text text-transparent">Cut Out The Middlemen.</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-600 font-medium mb-10 max-w-2xl mx-auto leading-relaxed">
+                    Farmer Connect helps retail buyers, restaurants, wholesalers, and commercial food vendors source fresh produce directly from farm roots, completely eliminating intermediary price inflation.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                    <a href="#request-produce" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-bold text-white bg-forest-800 hover:bg-forest-600 hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-forest-800/10 hover:shadow-xl hover:shadow-forest-800/20">
+                        Request Produce <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                    </a>
+                    <a href="#how-it-works" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 transition-all duration-200 shadow-sm">
+                        Learn More
+                    </a>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="location">Location</label>
-                <input 
-                    type="text" 
-                    name="location"
-                    id="location" 
-                    placeholder="Enter your location"
-                    required>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center mb-4 border border-forest-100">
+                        <i class="fa-solid fa-scale-balanced text-emerald_brand text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-forest-800 mb-1">Fair Prices</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">Bypassing wholesale markets returns cost power to corporate and family buyers.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center mb-4 border border-forest-100">
+                        <i class="fa-solid fa-store text-emerald_brand text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-forest-800 mb-1">Direct Access</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">Communicate logistics demands transparently with verified cultivation roots.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center mb-4 border border-forest-100">
+                        <i class="fa-solid fa-carrot text-emerald_brand text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-forest-800 mb-1">Fresh Produce</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">Bypass transit storage and collection delays; secure farm-to-table freshness.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center mb-4 border border-forest-100">
+                        <i class="fa-solid fa-hand-holding-dollar text-emerald_brand text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-forest-800 mb-1">Zero Broker Fees</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">Eliminate layered commissions. Every single shilling matches real market values.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="bg-forest-800 py-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#2d6a4f_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div class="p-4">
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-mint_brand tracking-tight mb-2">30% Lower</p>
+                    <p class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-forest-200">Buyer Costs Saved</p>
+                </div>
+                <div class="p-4">
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-mint_brand tracking-tight mb-2">500+</p>
+                    <p class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-forest-200">Farmers Networked</p>
+                </div>
+                <div class="p-4">
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-mint_brand tracking-tight mb-2">Same-Day</p>
+                    <p class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-forest-200">Logistics Matching</p>
+                </div>
+                <div class="p-4">
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-mint_brand tracking-tight mb-2">KES 0</p>
+                    <p class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-forest-200">Broker Commissions</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="problem" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight mb-4">Structural Supply Chain Correction</h2>
+                <p class="text-slate-500 font-medium text-base">Traditional agricultural logistics rely on excessive layers that artificially inflate buying costs while reducing real farm-level profitability.</p>
             </div>
 
-            <div class="form-group">
-                <label for="need">What Do You Need?</label>
-                <textarea 
-                    id="need"
-                    name="what_they_need"
-                    placeholder="E.g. 50kg of tomatoes, 20 trays of eggs, 100kg of maize..."
-                    required></textarea>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+                <div id="traditional-chain" class="bg-slate-50 p-8 sm:p-10 rounded-3xl border border-slate-200/60 flex flex-col justify-between">
+                    <div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 mb-6">Legacy Supply Chain</span>
+                        <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 bg-white p-4 rounded-xl border border-slate-200/50 mb-8 shadow-inner">
+                            <span>Farmer</span> <i class="fa-solid fa-arrow-right text-red-400"></i>
+                            <span class="text-red-700 bg-red-50 px-1.5 py-0.5 rounded">Broker</span> <i class="fa-solid fa-arrow-right text-red-400"></i>
+                            <span>Wholesaler</span> <i class="fa-solid fa-arrow-right text-red-400"></i>
+                            <span>Retailer</span> <i class="fa-solid fa-arrow-right text-red-400"></i>
+                            <span class="text-slate-800">Buyer</span>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-xmark text-red-500 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Multiple Hidden Markups</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Brokers step in at harvest levels to enforce stacked commission fees.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-xmark text-red-500 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Delayed Communication Loops</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Buyers face opaque inventory reports and delayed supply pipeline responses.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-xmark text-red-500 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Predatory Price Manipulation</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Middlemen exploit informational blind spots to dictate buying conditions.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-xmark text-red-500 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">Suppressed Producer Earnings</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Farmers absorb the production risks while retaining the lowest final margin.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="solution" class="bg-forest-50 p-8 sm:p-10 rounded-3xl border border-forest-200/50 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-mint_brand/40 rounded-bl-full z-0"></div>
+                    <div class="relative z-10">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-forest-800 bg-mint_brand border border-forest-200 mb-6">Farmer Connect Model</span>
+                        <div class="flex items-center gap-3 text-sm font-bold text-forest-800 bg-white p-4 rounded-xl border border-forest-100 mb-8 shadow-sm">
+                            <span class="bg-forest-50 px-2 py-1 rounded">Farmer</span>
+                            <i class="fa-solid fa-bolt text-emerald_brand animate-pulse"></i>
+                            <span class="bg-forest-800 text-white px-2 py-1 rounded">Farmer Connect Direct Route</span>
+                            <i class="fa-solid fa-bolt text-emerald_brand animate-pulse"></i>
+                            <span class="bg-forest-50 px-2 py-1 rounded">Commercial Buyer</span>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald_brand mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-forest-800 text-sm">Transparent Unit Pricing</h4>
+                                    <p class="text-xs text-slate-600 mt-0.5">Eliminates multi-tiered speculation. Financial matrices mirror true harvest values.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald_brand mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-forest-800 text-sm">Direct Logistical Alignment</h4>
+                                    <p class="text-xs text-slate-600 mt-0.5">Bypasses middlemen warehouses. Sourcing demands reach farm roots in seconds.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald_brand mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-forest-800 text-sm">Optimized Producer Income</h4>
+                                    <p class="text-xs text-slate-600 mt-0.5">Secures better long-term operational sustainability for agricultural networks.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald_brand mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-forest-800 text-sm">Substantially Lower Acquisition Overhead</h4>
+                                    <p class="text-xs text-slate-600 mt-0.5">Commercial buyers bypass markup pipelines to scale business margins.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="py-24 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight mb-4">Streamlined Sourcing Pipeline</h2>
+                <p class="text-slate-500 font-medium text-base">Four structured logistical steps connecting commercial supply demands with verified cultivation roots.</p>
             </div>
 
-            <button type="submit">Find Farmers</button>
-        </form>
-    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald_brand uppercase tracking-wider block mb-3">Step 01</span>
+                        <h3 class="font-bold text-base text-forest-800 mb-2">Submit Produce Request</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Specify required agricultural goods, volume metrics, and targeted operational delivery timelines through our portal.</p>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-file-pen text-slate-400 text-xs"></i></div>
+                    </div>
+                </div>
 
-</body>
-</html>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald_brand uppercase tracking-wider block mb-3">Step 02</span>
+                        <h3 class="font-bold text-base text-forest-800 mb-2">We Match Farmers</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Our execution network parses yield maps to isolate matching fields and harvest matrices in real time.</p>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-network-wired text-slate-400 text-xs"></i></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald_brand uppercase tracking-wider block mb-3">Step 03</span>
+                        <h3 class="font-bold text-base text-forest-800 mb-2">Receive Offers</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Review structured unit prices generated directly by matching producers, completely free from intermediate inflation layers.</p>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-receipt text-slate-400 text-xs"></i></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm relative flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald_brand uppercase tracking-wider block mb-3">Step 04</span>
+                        <h3 class="font-bold text-base text-forest-800 mb-2">Coordinate Delivery</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Lock in transport corridors and route direct, high-fidelity shipments to storage centers or business locations.</p>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-truck-ramp-box text-slate-400 text-xs"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="request-produce" class="py-24 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-mint_brand/30 rounded-full blur-3xl z-0 pointer-events-none"></div>
+        
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-forest-800 tracking-tight mb-4">Request Fresh Produce</h2>
+                <p class="text-slate-500 font-medium text-base">Detail your business provisioning demands below. Our system will immediately query matching farm sources across our decentralized network map.</p>
+            </div>
+
+            <div class="glass-form p-6 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/80 border border-white">
+                <form id="produce-request-form" class="space-y-6">
+                    
+                    <div id="form-alert-container" class="hidden transition-all duration-300"></div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="buyerName" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Full Name / Corporate Entity</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-user text-xs"></i></span>
+                                <input type="text" id="buyerName" name="buyerName" required placeholder="e.g., Jane Doe or Nyali Greens Restaurant" 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Phone Number</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-phone text-xs"></i></span>
+                                <input type="tel" id="phone" name="phone" required placeholder="e.g., +254 712 345 678" 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="location" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Delivery Location Hub</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-location-dot text-xs"></i></span>
+                                <input type="text" id="location" name="location" required placeholder="e.g., Nyali, Mombasa" 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="goodsRequested" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Goods Requested</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-lemon text-xs"></i></span>
+                                <input type="text" id="goodsRequested" name="goodsRequested" required placeholder="e.g., Grade A Tomatoes, Bulb Onions" 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="quantity" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Quantity Needed (Kilograms)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-weight-hanging text-xs"></i></span>
+                                <input type="number" id="quantity" name="quantity" min="1" required placeholder="e.g., 250" 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="preferredDeliveryDate" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Preferred Delivery Date</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400"><i class="fa-solid fa-calendar-days text-xs"></i></span>
+                                <input type="date" id="preferredDeliveryDate" name="preferredDeliveryDate" required 
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100 transition-all font-medium text-sm bg-white/50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 pt-2">
+                        <input type="checkbox" id="dataConsent" required class="mt-1 w-4 h-4 rounded border-slate-300 text-forest-600 focus:ring-forest-500 cursor-pointer">
+                        <label for="dataConsent" class="text-xs font-medium text-slate-500 leading-relaxed cursor-pointer select-none">
+                            I authorize Farmer Connect to parse this request data to coordinate logistics and query farming network nodes under the Kenya Data Protection Act 2022 parameters.
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full py-4 px-6 rounded-xl font-bold text-white bg-forest-800 hover:bg-forest-600 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <span id="btn-text">Find Farmers</span>
+                        <i id="btn-spinner" class="fa-solid fa-circle-notch animate-spin hidden"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="flex gap-4 items-start p-4">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center border border-forest-100 flex-shrink-0">
+                        <i class="fa-solid fa-user-shield text-emerald_brand text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-forest-800 mb-1">Verified Farmers Only</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Every producer undergoes background validation and harvest profile audits prior to receiving matching dispatch updates.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start p-4">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-center justify-center border border-forest-100 flex-shrink-0">
+                        <i class="fa-solid fa-magnifying-glass-chart text-emerald_brand text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-forest-800 mb-1">Transparent Price Records</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">No backend alterations, hidden management costs, or broker cutouts. Review exact producer asking price breakdowns.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start p-4">
+                    <div class="w-12 h-12 rounded-xl bg-forest-50 flex items-
