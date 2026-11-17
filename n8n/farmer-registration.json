@@ -1,0 +1,363 @@
+{
+  "name": "Farmer Connect | Farmer registration",
+  "nodes": [
+    {
+      "name": "Receive form",
+      "id": "Receive form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "farmer-connect-registration",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://eunicewairima.github.io"
+        }
+      },
+      "webhookId": "farmer-connect-registration"
+    },
+    {
+      "name": "Validate form",
+      "id": "Validate form",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const farmer = true;\nconst body = $json.body ?? {};\nconst row = {};\nconst validPhone = /^\\+(?:254[17][0-9]{8}|(?!254)[1-9][0-9]{7,14})$/;\nconst validEmail = /^[a-z0-9.!#$%&'*+/=?^_\\x60{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i;\nconst validReference = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;\nconst today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi' }).format(new Date());\n\nfunction readText(source, key, max, required = true) {\n    const value = typeof source?.[key] === 'string' ? source[key].trim() : '';\n    if ((required && !value) || value.length > max) throw new Error('Invalid ' + key);\n    return value;\n}\n\nfunction date(source, key) {\n    const value = readText(source, key, 10);\n    const parsed = new Date(value + 'T00:00:00Z');\n    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value) || !Number.isFinite(+parsed) ||\n        parsed.toISOString().slice(0, 10) !== value) throw new Error('Invalid ' + key);\n    return value;\n}\n\ntry {\n    row.reference = readText(body, 'reference', 36);\n    row[farmer ? 'farmerName' : 'buyerName'] = readText(body, farmer ? 'farmerName' : 'buyerName', 120);\n    row.phone = readText(body, 'phone', 16);\n    row.location = readText(body, 'location', 150);\n    if (!validReference.test(row.reference) || !validPhone.test(row.phone) || body.dataConsent !== 'true') {\n        throw new Error('Invalid reference, phone, or consent');\n    }\n    row.dataConsent = true;\n    if (!farmer) {\n        row.email = readText(body, 'email', 254);\n        row.notes = readText(body, 'notes', 1000, false);\n        row.preferredDeliveryDate = date(body, 'preferredDeliveryDate');\n        if (!validEmail.test(row.email) || row.preferredDeliveryDate < today) throw new Error('Invalid email or delivery date');\n    }\n\n    const entries = JSON.parse(readText(body, 'items', 16000));\n    if (!Array.isArray(entries) || entries.length < 1 || entries.length > 20) throw new Error('Invalid item count');\n    const items = entries.map((item) => {\n        const produce = readText(item, 'produce', 100);\n        const quantityKg = item.quantityKg;\n        if (typeof quantityKg !== 'number' || quantityKg < 0.01 || quantityKg > 1000000 ||\n            quantityKg !== Math.round(quantityKg * 100) / 100) throw new Error('Invalid quantity');\n        return { produce, quantityKg, ...(farmer && { harvestDate: date(item, 'harvestDate') }) };\n    });\n    row.items = JSON.stringify(items);\n    row.produce = items.map((item) => item.produce).join(', ');\n    row.itemDetails = items.map((item) => item.produce + ' — ' + item.quantityKg + ' kg' +\n        (farmer ? ', harvest ' + item.harvestDate : '')).join('\\n');\n    row.submittedAt = new Date().toISOString();\n    row.status = farmer ? 'Pending review' : 'New';\n    return { valid: true, row };\n} catch {\n    return { valid: false };\n}"
+      }
+    },
+    {
+      "name": "Valid form?",
+      "id": "Valid form?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Valid form?",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Reject form",
+      "id": "Reject form",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        660,
+        220
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ saved: false }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "name": "Find reference",
+      "id": "Find reference",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "FARMER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Farmers",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "reference",
+              "lookupValue": "={{ $json.row.reference }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "name": "Already saved?",
+      "id": "Already saved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "Already saved?",
+              "leftValue": "={{ Boolean($json.reference) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Prepare sheet row",
+      "id": "Prepare sheet row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        130
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return $('Validate form').first().json.row;"
+      }
+    },
+    {
+      "name": "Save row",
+      "id": "Save row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1320,
+        130
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "FARMER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Farmers",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "value": {},
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "error",
+          "useAppend": true
+        }
+      }
+    },
+    {
+      "name": "Confirm receipt",
+      "id": "Confirm receipt",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1540,
+        130
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ saved: true, reference: $('Validate form').first().json.row.reference }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "name": "Check retry",
+      "id": "Check retry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -130
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $('Validate form').first().json.row;\nconst matches = Object.entries(row).every(([key, value]) =>\n    ['submittedAt', 'status'].includes(key) || String($json[key] ?? '') === String(value));\nreturn { matches, reference: row.reference };"
+      }
+    },
+    {
+      "name": "Confirm retry",
+      "id": "Confirm retry",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1320,
+        -130
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ ({ saved: $json.matches, reference: $json.reference }) }}",
+        "options": {
+          "responseCode": "={{ $json.matches ? 200 : 409 }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receive form": {
+      "main": [
+        [
+          {
+            "node": "Validate form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate form": {
+      "main": [
+        [
+          {
+            "node": "Valid form?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid form?": {
+      "main": [
+        [
+          {
+            "node": "Find reference",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find reference": {
+      "main": [
+        [
+          {
+            "node": "Already saved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already saved?": {
+      "main": [
+        [
+          {
+            "node": "Check retry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare sheet row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check retry": {
+      "main": [
+        [
+          {
+            "node": "Confirm retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare sheet row": {
+      "main": [
+        [
+          {
+            "node": "Save row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save row": {
+      "main": [
+        [
+          {
+            "node": "Confirm receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Nairobi",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false
+  }
+}

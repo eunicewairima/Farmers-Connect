@@ -1,0 +1,547 @@
+{
+  "name": "Farmer Connect | Email notifications",
+  "nodes": [
+    {
+      "name": "Every ten minutes",
+      "id": "Every ten minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Read Requests",
+      "id": "Read Requests",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "BUYER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Requests",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Prepare buyer alert",
+      "id": "Prepare buyer alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const statuses = ['New', 'Finding farmers', 'Offer sent', 'Completed'];\nreturn $input.all().flatMap(({ json: row }, index) => {\n    if (!row.reference || !(!row.ownerAlertedAt)) return [];\n    const status = row.status;\n    const confirmation = !row.lastEmailedStatus;\n    return [{\n        json: {\n            reference: row.reference,\n            marker: new Date().toISOString(),\n            recipient: 'OWNER_EMAIL@example.com',\n            subject: 'New produce request ' + row.reference,\n            message: 'Review the Requests spreadsheet.\\nReference: ' + row.reference + '\\nLocation: ' + row.location + '\\n\\n' + row.itemDetails,\n        },\n        pairedItem: { item: index },\n    }];\n});"
+      }
+    },
+    {
+      "name": "Send buyer alert",
+      "id": "Send buyer alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "fromEmail": "SENDER_EMAIL@example.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Record buyer alert",
+      "id": "Record buyer alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().flatMap(({ json: delivery }, index) => {\n    if (!delivery.accepted?.length) return [];\n    const sent = $('Prepare buyer alert').itemMatching(index).json;\n    return [{ json: { reference: sent.reference, ownerAlertedAt: sent.marker } }];\n});"
+      }
+    },
+    {
+      "name": "Update buyer alert",
+      "id": "Update buyer alert",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "BUYER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Requests",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "reference"
+          ],
+          "value": {
+            "reference": "={{ $json.reference }}",
+            "ownerAlertedAt": "={{ $json.ownerAlertedAt }}"
+          },
+          "schema": [
+            {
+              "id": "reference",
+              "displayName": "reference",
+              "type": "string",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true
+            },
+            {
+              "id": "ownerAlertedAt",
+              "displayName": "ownerAlertedAt",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "error"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Prepare buyer status",
+      "id": "Prepare buyer status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        260
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const statuses = ['New', 'Finding farmers', 'Offer sent', 'Completed'];\nreturn $input.all().flatMap(({ json: row }, index) => {\n    if (!row.reference || !(statuses.includes(row.status) && row.email && row.status !== row.lastEmailedStatus)) return [];\n    const status = row.status;\n    const confirmation = !row.lastEmailedStatus;\n    return [{\n        json: {\n            reference: row.reference,\n            marker: status,\n            recipient: row.email,\n            subject: 'Produce request ' + row.reference + ' — ' + status,\n            message: (confirmation ? 'We received your produce request.\\n' : '') +\n            'Current status: ' + status + '\\nReference: ' + row.reference +\n            '\\n\\n' + row.itemDetails + '\\nDelivery location: ' + row.location + '\\nPreferred date: ' + row.preferredDeliveryDate,\n        },\n        pairedItem: { item: index },\n    }];\n});"
+      }
+    },
+    {
+      "name": "Send buyer status",
+      "id": "Send buyer status",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        260
+      ],
+      "parameters": {
+        "fromEmail": "SENDER_EMAIL@example.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Record buyer status",
+      "id": "Record buyer status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        260
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().flatMap(({ json: delivery }, index) => {\n    if (!delivery.accepted?.length) return [];\n    const sent = $('Prepare buyer status').itemMatching(index).json;\n    return [{ json: { reference: sent.reference, lastEmailedStatus: sent.marker } }];\n});"
+      }
+    },
+    {
+      "name": "Update buyer status",
+      "id": "Update buyer status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1100,
+        260
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "BUYER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Requests",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "reference"
+          ],
+          "value": {
+            "reference": "={{ $json.reference }}",
+            "lastEmailedStatus": "={{ $json.lastEmailedStatus }}"
+          },
+          "schema": [
+            {
+              "id": "reference",
+              "displayName": "reference",
+              "type": "string",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true
+            },
+            {
+              "id": "lastEmailedStatus",
+              "displayName": "lastEmailedStatus",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "error"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Read Farmers",
+      "id": "Read Farmers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        220,
+        520
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "FARMER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Farmers",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Prepare farmer alert",
+      "id": "Prepare farmer alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        520
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const statuses = ['New', 'Finding farmers', 'Offer sent', 'Completed'];\nreturn $input.all().flatMap(({ json: row }, index) => {\n    if (!row.reference || !(!row.ownerAlertedAt)) return [];\n    const status = row.status;\n    const confirmation = !row.lastEmailedStatus;\n    return [{\n        json: {\n            reference: row.reference,\n            marker: new Date().toISOString(),\n            recipient: 'OWNER_EMAIL@example.com',\n            subject: 'New farmer registration ' + row.reference,\n            message: 'Review the Farmers spreadsheet.\\nReference: ' + row.reference + '\\nLocation: ' + row.location + '\\n\\n' + row.itemDetails,\n        },\n        pairedItem: { item: index },\n    }];\n});"
+      }
+    },
+    {
+      "name": "Send farmer alert",
+      "id": "Send farmer alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        520
+      ],
+      "parameters": {
+        "fromEmail": "SENDER_EMAIL@example.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Record farmer alert",
+      "id": "Record farmer alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        520
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().flatMap(({ json: delivery }, index) => {\n    if (!delivery.accepted?.length) return [];\n    const sent = $('Prepare farmer alert').itemMatching(index).json;\n    return [{ json: { reference: sent.reference, ownerAlertedAt: sent.marker } }];\n});"
+      }
+    },
+    {
+      "name": "Update farmer alert",
+      "id": "Update farmer alert",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1100,
+        520
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "FARMER_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Farmers",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "reference"
+          ],
+          "value": {
+            "reference": "={{ $json.reference }}",
+            "ownerAlertedAt": "={{ $json.ownerAlertedAt }}"
+          },
+          "schema": [
+            {
+              "id": "reference",
+              "displayName": "reference",
+              "type": "string",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true
+            },
+            {
+              "id": "ownerAlertedAt",
+              "displayName": "ownerAlertedAt",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "handlingExtraData": "error"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Prepare buyer alert": {
+      "main": [
+        [
+          {
+            "node": "Send buyer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send buyer alert": {
+      "main": [
+        [
+          {
+            "node": "Record buyer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record buyer alert": {
+      "main": [
+        [
+          {
+            "node": "Update buyer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare buyer status": {
+      "main": [
+        [
+          {
+            "node": "Send buyer status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send buyer status": {
+      "main": [
+        [
+          {
+            "node": "Record buyer status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record buyer status": {
+      "main": [
+        [
+          {
+            "node": "Update buyer status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare farmer alert": {
+      "main": [
+        [
+          {
+            "node": "Send farmer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send farmer alert": {
+      "main": [
+        [
+          {
+            "node": "Record farmer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record farmer alert": {
+      "main": [
+        [
+          {
+            "node": "Update farmer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every ten minutes": {
+      "main": [
+        [
+          {
+            "node": "Read Requests",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Farmers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Requests": {
+      "main": [
+        [
+          {
+            "node": "Prepare buyer alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare buyer status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Farmers": {
+      "main": [
+        [
+          {
+            "node": "Prepare farmer alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Nairobi",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false
+  }
+}
